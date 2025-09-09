@@ -29,35 +29,14 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card shadow-soft">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Brain className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">StudyForge</h1>
-                <p className="text-sm text-muted-foreground">AI-Powered Study Planning</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Badge variant="secondary" className="px-3 py-1">
-                <Zap className="w-3 h-3 mr-1" />
-                {currentStudyPlan.streak} day streak
-              </Badge>
-              <Button className="bg-gradient-primary text-primary-foreground hover:opacity-90">
-                Connect to Supabase
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold text-foreground">Welcome to StudyForge</h1>
+        <p className="text-xl text-muted-foreground">Your AI-powered study companion is ready!</p>
+      </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Main Content */}
