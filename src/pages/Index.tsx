@@ -1,190 +1,401 @@
-import { Calendar, Brain, Target, TrendingUp, Clock, BookOpen, Zap, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useAIRoadmap } from "@/hooks/useAIRoadmap";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { StudyCalendar } from "@/components/StudyCalendar";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Brain,
+  Target,
+  Clock,
+  TrendingUp,
+  Calendar,
+  BookOpen,
+  Users,
+  Award,
+  CheckCircle,
+  AlertCircle,
+  Zap,
+  Star,
+  Plus,
+  Sparkles,
+  ChevronRight
+} from "lucide-react";
 import { AICoach } from "@/components/AICoach";
 import { QuickActions } from "@/components/QuickActions";
 
 const Index = () => {
-  const currentStudyPlan = {
-    title: "Data Structures & Algorithms",
-    progress: 68,
-    nextTask: "Binary Trees - Traversal Algorithms",
-    timeToday: "2h 15m",
-    streak: 12
+  const { user } = useAuth();
+  const { generateRoadmap, loading: roadmapLoading } = useAIRoadmap();
+  const { toast } = useToast();
+  const [studyPlans, setStudyPlans] = useState<any[]>([]);
+  const [recentSessions, setRecentSessions] = useState<any[]>([]);
+  const [showRoadmapDialog, setShowRoadmapDialog] = useState(false);
+  const [roadmapForm, setRoadmapForm] = useState({
+    goal: '',
+    timeline_weeks: 4,
+    available_hours_per_week: 10,
+    difficulty_level: 'intermediate' as 'beginner' | 'intermediate' | 'advanced'
+  });
+
+  useEffect(() => {
+    if (user) {
+      fetchStudyPlans();
+      fetchRecentSessions();
+    }
+  }, [user]);
+
+  const fetchStudyPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('study_plans')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setStudyPlans(data || []);
+    } catch (error) {
+      console.error('Error fetching study plans:', error);
+    }
   };
 
-  const todaysTasks = [
-    { id: 1, title: "Complete Binary Tree Problems", type: "practice", priority: "high", estimated: "45min" },
-    { id: 2, title: "Review Hash Maps", type: "review", priority: "medium", estimated: "20min" },
-    { id: 3, title: "Watch Dynamic Programming Video", type: "learn", priority: "low", estimated: "30min" }
-  ];
+  const fetchRecentSessions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('study_sessions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-  const recentProgress = [
-    { subject: "Arrays", completed: 15, total: 20, lastStudied: "Today" },
-    { subject: "Linked Lists", completed: 12, total: 15, lastStudied: "Yesterday" },
-    { subject: "Stacks & Queues", completed: 8, total: 10, lastStudied: "2 days ago" }
-  ];
+      if (error) throw error;
+      setRecentSessions(data || []);
+    } catch (error) {
+      console.error('Error fetching recent sessions:', error);
+    }
+  };
+
+  const handleGenerateRoadmap = async () => {
+    if (!roadmapForm.goal.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a study goal",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const result = await generateRoadmap(roadmapForm);
+    
+    if (result) {
+      toast({
+        title: "Success!",
+        description: "Your AI study roadmap has been created",
+      });
+      setShowRoadmapDialog(false);
+      setRoadmapForm({
+        goal: '',
+        timeline_weeks: 4,
+        available_hours_per_week: 10,
+        difficulty_level: 'intermediate'
+      });
+      fetchStudyPlans(); // Refresh the study plans list
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <Card className="w-[400px] shadow-xl">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold gradient-text">Welcome to StudyForge</CardTitle>
+            <CardDescription>
+              Your AI-powered study companion for mastering any subject
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <Brain className="h-4 w-4" />
+              <span>AI-generated study roadmaps</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <Target className="h-4 w-4" />
+              <span>Adaptive spaced repetition</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>Smart micro-lessons</span>
+            </div>
+            <Button asChild className="w-full bg-gradient-primary text-white hover:opacity-90">
+              <a href="/auth">Get Started</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-foreground">Welcome to StudyForge</h1>
-        <p className="text-xl text-muted-foreground">Your AI-powered study companion is ready!</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold gradient-text">Welcome back!</h1>
+          <p className="text-muted-foreground">Ready to continue your learning journey?</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="flex items-center gap-1">
+            <Zap className="h-3 w-3" />
+            12 day streak
+          </Badge>
+        </div>
       </div>
 
-      <div className="container mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Main Content */}
-          <div className="lg:col-span-8 space-y-6">
-            
-            {/* Current Study Plan */}
-            <Card className="shadow-medium border-0 bg-gradient-secondary">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl text-secondary-foreground">
-                      {currentStudyPlan.title}
-                    </CardTitle>
-                    <CardDescription className="text-secondary-foreground/70">
-                      Your AI-generated study roadmap
-                    </CardDescription>
-                  </div>
-                  <Target className="w-8 h-8 text-secondary-accent" />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* AI Roadmap */}
+          <Card className="border-primary/20 bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  <CardTitle>AI Study Roadmap</CardTitle>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-secondary-foreground">Progress</span>
-                      <span className="text-sm text-secondary-foreground/70">{currentStudyPlan.progress}%</span>
-                    </div>
-                    <Progress value={currentStudyPlan.progress} className="h-3" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-card rounded-lg border">
-                    <div>
-                      <p className="font-medium text-foreground">Next: {currentStudyPlan.nextTask}</p>
-                      <p className="text-sm text-muted-foreground">Recommended by AI Coach</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Start Now <ChevronRight className="w-4 h-4 ml-1" />
+                <Dialog open={showRoadmapDialog} onOpenChange={setShowRoadmapDialog}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      Generate
                     </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Today's Tasks */}
-            <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-primary" />
-                  Today's Tasks
-                </CardTitle>
-                <CardDescription>
-                  Personalized schedule for optimal learning
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Brain className="h-5 w-5 text-primary" />
+                        Create AI Study Roadmap
+                      </DialogTitle>
+                      <DialogDescription>
+                        Let AI create a personalized study plan based on your goals and schedule.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="goal">Study Goal</Label>
+                        <Input
+                          id="goal"
+                          placeholder="e.g., Learn React for web development"
+                          value={roadmapForm.goal}
+                          onChange={(e) => setRoadmapForm(prev => ({ ...prev, goal: e.target.value }))}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="timeline">Timeline (weeks)</Label>
+                          <Input
+                            id="timeline"
+                            type="number"
+                            min="1"
+                            max="52"
+                            value={roadmapForm.timeline_weeks}
+                            onChange={(e) => setRoadmapForm(prev => ({ ...prev, timeline_weeks: parseInt(e.target.value) || 4 }))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="hours">Hours/week</Label>
+                          <Input
+                            id="hours"
+                            type="number"
+                            min="1"
+                            max="40"
+                            value={roadmapForm.available_hours_per_week}
+                            onChange={(e) => setRoadmapForm(prev => ({ ...prev, available_hours_per_week: parseInt(e.target.value) || 10 }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Difficulty Level</Label>
+                        <Select
+                          value={roadmapForm.difficulty_level}
+                          onValueChange={(value: 'beginner' | 'intermediate' | 'advanced') => 
+                            setRoadmapForm(prev => ({ ...prev, difficulty_level: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="beginner">Beginner</SelectItem>
+                            <SelectItem value="intermediate">Intermediate</SelectItem>
+                            <SelectItem value="advanced">Advanced</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button 
+                        onClick={handleGenerateRoadmap} 
+                        disabled={roadmapLoading}
+                        className="w-full"
+                      >
+                        {roadmapLoading ? "Generating..." : "Create Roadmap"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <CardDescription>
+                Personalized learning path powered by AI
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {studyPlans.length > 0 ? (
                 <div className="space-y-3">
-                  {todaysTasks.map((task) => (
-                    <div key={task.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          task.priority === 'high' ? 'bg-warning' : 
-                          task.priority === 'medium' ? 'bg-primary' : 'bg-success'
-                        }`} />
+                  {studyPlans.slice(0, 2).map((plan) => (
+                    <div key={plan.id} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium truncate">{plan.title}</span>
+                        <Badge variant={plan.status === 'active' ? 'default' : 'secondary'}>
+                          {plan.status}
+                        </Badge>
+                      </div>
+                      <Progress value={Math.floor(Math.random() * 100)} className="h-2" />
+                      <p className="text-xs text-muted-foreground">
+                        {plan.difficulty_level} • {plan.timeline_days} days • {plan.hours_per_week}h/week
+                      </p>
+                    </div>
+                  ))}
+                  <Button className="w-full bg-gradient-primary text-white hover:opacity-90" asChild>
+                    <a href="/plans">View All Plans</a>
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <Brain className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-3">No study plans yet</p>
+                  <Button 
+                    onClick={() => setShowRoadmapDialog(true)}
+                    className="bg-gradient-primary text-white hover:opacity-90"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Create Your First Roadmap
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Today's Tasks */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                Today's Tasks
+              </CardTitle>
+              <CardDescription>Recommended by your AI coach</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentSessions.length > 0 ? (
+                <div className="space-y-3">
+                  {recentSessions.slice(0, 3).map((session) => (
+                    <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-primary"></div>
                         <div>
-                          <p className="font-medium text-foreground">{task.title}</p>
-                          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">{task.type}</Badge>
-                            <span>~{task.estimated}</span>
-                          </div>
+                          <p className="font-medium">{session.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {session.duration_minutes ? `${session.duration_minutes}min` : 'Study session'}
+                          </p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">Complete</Button>
+                      <Button size="sm" variant="outline">
+                        Continue
+                      </Button>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Progress */}
-            <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2 text-success" />
-                  Recent Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentProgress.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-foreground">{item.subject}</span>
-                          <span className="text-sm text-muted-foreground">{item.lastStudied}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Progress value={(item.completed / item.total) * 100} className="flex-1 h-2" />
-                          <span className="text-xs text-muted-foreground">
-                            {item.completed}/{item.total}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="h-8 w-8 mx-auto mb-2" />
+                  <p className="text-sm">No tasks for today</p>
+                  <Button variant="outline" size="sm" className="mt-2">
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Task
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
-            
-            {/* Quick Actions */}
-            <QuickActions />
-            
-            {/* Study Calendar */}
-            <StudyCalendar />
-            
-            {/* AI Coach */}
-            <AICoach />
-            
-            {/* Study Stats */}
-            <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle className="text-lg">Study Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-success-light rounded-lg">
-                    <div className="text-2xl font-bold text-success">{currentStudyPlan.timeToday}</div>
-                    <div className="text-xs text-success/70">Today</div>
-                  </div>
-                  <div className="text-center p-3 bg-primary-light rounded-lg">
-                    <div className="text-2xl font-bold text-primary">87</div>
-                    <div className="text-xs text-primary/70">Problems Solved</div>
-                  </div>
-                  <div className="text-center p-3 bg-warning-light rounded-lg">
-                    <div className="text-2xl font-bold text-warning">4.2</div>
-                    <div className="text-xs text-warning/70">Avg Hours/Day</div>
-                  </div>
-                  <div className="text-center p-3 bg-secondary rounded-lg">
-                    <div className="text-2xl font-bold text-secondary-accent">92%</div>
-                    <div className="text-xs text-secondary-foreground/70">Success Rate</div>
-                  </div>
+          {/* Progress Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-success" />
+                Progress Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">87</div>
+                  <div className="text-sm text-muted-foreground">Problems Solved</div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-success">12</div>
+                  <div className="text-sm text-muted-foreground">Day Streak</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-warning">4.2h</div>
+                  <div className="text-sm text-muted-foreground">Avg Daily</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">92%</div>
+                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Quick Actions */}
+          <QuickActions />
+          
+          {/* AI Coach */}
+          <AICoach />
+          
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3 text-sm">
+                <CheckCircle className="h-4 w-4 text-success" />
+                <span>Completed Binary Tree chapter</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <Star className="h-4 w-4 text-warning" />
+                <span>Achieved 90% on algorithms quiz</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span>Scheduled review session</span>
+              </div>
+              <Button variant="outline" size="sm" className="w-full">
+                View All Activity
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
