@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      imports: {
+        Row: {
+          created_at: string
+          id: string
+          import_data: Json
+          last_synced: string
+          platform: string
+          problems_count: number
+          status: string
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          import_data?: Json
+          last_synced?: string
+          platform: string
+          problems_count?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          import_data?: Json
+          last_synced?: string
+          platform?: string
+          problems_count?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      plan_items: {
+        Row: {
+          completed_at: string | null
+          confidence_level: number | null
+          created_at: string
+          description: string | null
+          difficulty_level: string
+          estimated_duration_minutes: number
+          id: string
+          order_index: number
+          prerequisites: string[] | null
+          status: string
+          study_plan_id: string
+          title: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          confidence_level?: number | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string
+          estimated_duration_minutes?: number
+          id?: string
+          order_index?: number
+          prerequisites?: string[] | null
+          status?: string
+          study_plan_id: string
+          title: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          confidence_level?: number | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string
+          estimated_duration_minutes?: number
+          id?: string
+          order_index?: number
+          prerequisites?: string[] | null
+          status?: string
+          study_plan_id?: string
+          title?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_items_study_plan_id_fkey"
+            columns: ["study_plan_id"]
+            isOneToOne: false
+            referencedRelation: "study_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -45,6 +143,131 @@ export type Database = {
           id?: string
           study_preferences?: Json | null
           timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      progress_logs: {
+        Row: {
+          activity_type: string
+          concept_id: string | null
+          confidence_after: number | null
+          confidence_before: number | null
+          correctness: number | null
+          created_at: string
+          id: string
+          item_id: string | null
+          metadata: Json | null
+          notes: string | null
+          time_taken_minutes: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          concept_id?: string | null
+          confidence_after?: number | null
+          confidence_before?: number | null
+          correctness?: number | null
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          time_taken_minutes?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          concept_id?: string | null
+          confidence_after?: number | null
+          confidence_before?: number | null
+          correctness?: number | null
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          time_taken_minutes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progress_logs_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "plan_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snapshots: {
+        Row: {
+          generated_at: string
+          id: string
+          is_exported: boolean
+          pdf_url: string | null
+          snapshot_data: Json
+          title: string
+          user_id: string
+        }
+        Insert: {
+          generated_at?: string
+          id?: string
+          is_exported?: boolean
+          pdf_url?: string | null
+          snapshot_data?: Json
+          title: string
+          user_id: string
+        }
+        Update: {
+          generated_at?: string
+          id?: string
+          is_exported?: boolean
+          pdf_url?: string | null
+          snapshot_data?: Json
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      spaced_items: {
+        Row: {
+          concept_id: string
+          concept_title: string
+          created_at: string
+          ease_factor: number
+          id: string
+          interval_days: number
+          last_reviewed: string | null
+          next_review: string
+          repetitions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          concept_id: string
+          concept_title: string
+          created_at?: string
+          ease_factor?: number
+          id?: string
+          interval_days?: number
+          last_reviewed?: string | null
+          next_review?: string
+          repetitions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          concept_id?: string
+          concept_title?: string
+          created_at?: string
+          ease_factor?: number
+          id?: string
+          interval_days?: number
+          last_reviewed?: string | null
+          next_review?: string
+          repetitions?: number
           updated_at?: string
           user_id?: string
         }
@@ -138,6 +361,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sync_audit: {
+        Row: {
+          data_checksum: string | null
+          error_message: string | null
+          id: string
+          sync_status: string
+          sync_type: string
+          synced_at: string
+          user_id: string
+        }
+        Insert: {
+          data_checksum?: string | null
+          error_message?: string | null
+          id?: string
+          sync_status?: string
+          sync_type: string
+          synced_at?: string
+          user_id: string
+        }
+        Update: {
+          data_checksum?: string | null
+          error_message?: string | null
+          id?: string
+          sync_status?: string
+          sync_type?: string
+          synced_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
