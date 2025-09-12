@@ -12,7 +12,6 @@ import StudyPlans from "./pages/StudyPlans";
 import Calendar from "./pages/Calendar";
 import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,13 +26,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<Auth />} />
-            <Route element={<Layout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/plans" element={<StudyPlans />} />
-              <Route path="/dashboard/calendar" element={<Calendar />} />
-              <Route path="/dashboard/progress" element={<Progress />} />
-              <Route path="/dashboard/settings" element={<Settings />} />
-              <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="plans" element={<StudyPlans />} />
+              <Route path="calendar" element={<Calendar />} />
+              <Route path="progress" element={<Progress />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
