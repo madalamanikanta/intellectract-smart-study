@@ -13,17 +13,14 @@ const Layout = () => {
   }
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Study Plans', href: '/plans', icon: BookOpen },
-    { name: 'Calendar', href: '/calendar', icon: Calendar },
-    { name: 'Progress', href: '/progress', icon: TrendingUp },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Study Plans', href: '/dashboard/plans', icon: BookOpen },
+    { name: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
+    { name: 'Progress', href: '/dashboard/progress', icon: TrendingUp },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
   const isActive = (href: string) => {
-    if (href === '/') {
-      return location.pathname === '/';
-    }
     return location.pathname.startsWith(href);
   };
 
@@ -33,7 +30,7 @@ const Layout = () => {
       <header className="border-b bg-card shadow-soft sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3">
+            <Link to="/dashboard" className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <Brain className="w-6 h-6 text-primary-foreground" />
               </div>
