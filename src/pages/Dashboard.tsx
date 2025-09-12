@@ -46,11 +46,9 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      fetchStudyPlans();
-      fetchRecentSessions();
-    }
-  }, [user]);
+    fetchStudyPlans();
+    fetchRecentSessions();
+  }, []);
 
   const fetchStudyPlans = async () => {
     try {
