@@ -31,7 +31,7 @@ import {
 import { AICoach } from "@/components/AICoach";
 import { QuickActions } from "@/components/QuickActions";
 
-const Index = () => {
+const Dashboard = () => {
   const { user } = useAuth();
   const { generateRoadmap, loading: roadmapLoading } = useAIRoadmap();
   const { toast } = useToast();
@@ -111,38 +111,6 @@ const Index = () => {
       fetchStudyPlans(); // Refresh the study plans list
     }
   };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-        <Card className="w-[400px] shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold gradient-text">Welcome to StudyForge</CardTitle>
-            <CardDescription>
-              Your AI-powered study companion for mastering any subject
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Brain className="h-4 w-4" />
-              <span>AI-generated study roadmaps</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Target className="h-4 w-4" />
-              <span>Adaptive spaced repetition</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              <span>Smart micro-lessons</span>
-            </div>
-            <Button asChild className="w-full bg-gradient-primary text-white hover:opacity-90">
-              <a href="/auth">Get Started</a>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -402,4 +370,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Dashboard;
