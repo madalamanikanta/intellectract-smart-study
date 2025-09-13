@@ -14,6 +14,9 @@ import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import SpacedRepetition from "./pages/SpacedRepetition";
+import Decks from "./pages/Decks";
+import Deck from "./pages/Deck";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +33,9 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/plans" element={<StudyPlans />} />
+              <Route path="/dashboard/srs" element={<SpacedRepetition />} />
+              <Route path="/dashboard/decks" element={<Decks />} />
+              <Route path="/dashboard/decks/:deckId" element={<Deck />} />
               <Route path="/dashboard/calendar" element={<Calendar />} />
               <Route path="/dashboard/progress" element={<Progress />} />
               <Route path="/dashboard/settings" element={<Settings />} />

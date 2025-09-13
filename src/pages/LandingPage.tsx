@@ -19,7 +19,7 @@ const LandingPage = () => {
       {/* Header */}
       <header className="container mx-auto px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <img src="/logo.webp" alt="StudyForge Logo" className="h-8 w-8" />
+          <Brain className="h-8 w-8 text-primary" />
           <span className="text-2xl font-bold">StudyForge</span>
         </div>
         <nav className="space-x-4">
@@ -59,7 +59,7 @@ const LandingPage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="p-8 bg-white rounded-lg shadow-md text-center">
-                <img src="/logo.webp" alt="StudyForge Logo" className="h-12 w-12 mx-auto mb-4" />
+                <Brain className="h-12 w-12 text-primary mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-2">AI Study Roadmaps</h3>
                 <p className="text-muted-foreground">
                   Get a personalized, step-by-step plan to achieve your learning objectives, powered by AI.

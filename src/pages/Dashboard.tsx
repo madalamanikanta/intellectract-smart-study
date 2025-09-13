@@ -30,10 +30,6 @@ import {
 } from "lucide-react";
 import { AICoach } from "@/components/AICoach";
 import { QuickActions } from "@/components/QuickActions";
-import CourseCompletionChart from "@/components/CourseCompletionChart";
-import RecentActivityChart from "@/components/RecentActivityChart";
-import SubjectProgress from "@/components/SubjectProgress";
-import Leaderboard from "@/components/Leaderboard";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -333,13 +329,6 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CourseCompletionChart />
-            <RecentActivityChart />
-          </div>
-
-          <SubjectProgress />
         </div>
 
         {/* Sidebar */}
@@ -373,8 +362,6 @@ const Dashboard = () => {
               </Button>
             </CardContent>
           </Card>
-
-          <Leaderboard />
         </div>
       </div>
     </div>
