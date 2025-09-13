@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Home, Calendar, BookOpen, TrendingUp, Settings, Zap, LogOut, User as UserIcon } from 'lucide-react';
+import { Brain, Home, Calendar, BookOpen, TrendingUp, Settings, Zap, LogOut, User as UserIcon, Star } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,9 +33,7 @@ const Layout = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link to="/dashboard" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Brain className="w-6 h-6 text-primary-foreground" />
-              </div>
+              <img src="/logo.webp" alt="StudyForge Logo" className="w-10 h-10" />
               <div>
                 <h1 className="text-2xl font-bold text-foreground">StudyForge</h1>
                 <p className="text-sm text-muted-foreground">AI-Powered Study Planning</p>
@@ -47,10 +45,16 @@ const Layout = () => {
                 <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Home</Link>
                 <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
               </nav>
-              <Badge variant="secondary" className="px-3 py-1">
-                <Zap className="w-3 h-3 mr-1" />
-                12 day streak
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="px-3 py-1 flex items-center gap-1">
+                  <Zap className="h-3 w-3" />
+                  12 day streak
+                </Badge>
+                <Badge variant="secondary" className="px-3 py-1 flex items-center gap-1">
+                  <Star className="h-3 w-3" />
+                  1,250 points
+                </Badge>
+              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
