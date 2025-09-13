@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+// TODO: Replace with real data from the backend
 const users = [
   { name: 'Alice', points: 5400, avatar: '/avatars/01.png' },
   { name: 'Bob', points: 4800, avatar: '/avatars/02.png' },

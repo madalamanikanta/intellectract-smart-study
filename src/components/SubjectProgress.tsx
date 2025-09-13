@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
+// TODO: Replace with real data from the backend
 const subjects = [
   { name: 'Mathematics', progress: 80 },
   { name: 'Physics', progress: 65 },
