@@ -304,6 +304,36 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
+          {/* Progress Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-success" />
+                Progress Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">87</div>
+                  <div className="text-sm text-muted-foreground">Problems Solved</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-success">12</div>
+                  <div className="text-sm text-muted-foreground">Day Streak</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-warning">4.2h</div>
+                  <div className="text-sm text-muted-foreground">Avg Daily</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">92%</div>
+                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CourseCompletionChart />
             <RecentActivityChart />
@@ -319,6 +349,30 @@ const Dashboard = () => {
           
           {/* AI Coach */}
           <AICoach />
+
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3 text-sm">
+                <CheckCircle className="h-4 w-4 text-success" />
+                <span>Completed Binary Tree chapter</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <Star className="h-4 w-4 text-warning" />
+                <span>Achieved 90% on algorithms quiz</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span>Scheduled review session</span>
+              </div>
+              <Button variant="outline" size="sm" className="w-full">
+                View All Activity
+              </Button>
+            </CardContent>
+          </Card>
 
           <Leaderboard />
         </div>

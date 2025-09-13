@@ -33,7 +33,7 @@ const Layout = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link to="/dashboard" className="flex items-center space-x-3">
-              <img src="/logo.webp" alt="StudyForge Logo" className="w-10 h-10" />
+              <img src="/logo.webp" alt="StudyForge Logo" className="w-12 h-12 self-center" />
               <div>
                 <h1 className="text-2xl font-bold text-foreground">StudyForge</h1>
                 <p className="text-sm text-muted-foreground">AI-Powered Study Planning</p>

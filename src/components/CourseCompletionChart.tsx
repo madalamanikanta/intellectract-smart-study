@@ -1,6 +1,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+// TODO: Replace with real data from the backend
 const data = [
   { name: 'Completed', value: 75 },
   { name: 'In Progress', value: 25 },

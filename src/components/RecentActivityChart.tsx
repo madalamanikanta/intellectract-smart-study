@@ -1,6 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+// TODO: Replace with real data from the backend
 const data = [
   { name: 'Mon', lessons: 4 },
   { name: 'Tue', lessons: 3 },
