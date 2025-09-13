@@ -3,9 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 export const AICoach = () => {
-  const suggestions = [
+  const [suggestions, setSuggestions] = useState([
     {
       type: "tip",
       message: "Based on your progress, focus on tree traversal algorithms next. They're fundamental for your upcoming goals.",
@@ -16,7 +17,16 @@ export const AICoach = () => {
       message: "You learn best between 2-4 PM. Consider scheduling complex topics during this time.",
       time: "1 hour ago"
     }
-  ];
+  ]);
+
+  const generateStudyPath = () => {
+    const newSuggestion = {
+      type: "path",
+      message: "New study path generated: Focus on advanced data structures for the next 2 weeks.",
+      time: "Just now"
+    };
+    setSuggestions([newSuggestion, ...suggestions]);
+  };
 
   return (
     <Card className="shadow-medium">
@@ -79,6 +89,9 @@ export const AICoach = () => {
             </Button>
             <Button variant="outline" size="sm" className="text-xs">
               Study tips
+            </Button>
+            <Button variant="outline" size="sm" className="text-xs" onClick={generateStudyPath}>
+              Generate Study Path
             </Button>
           </div>
         </div>
