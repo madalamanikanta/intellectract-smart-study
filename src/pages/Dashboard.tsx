@@ -26,8 +26,10 @@ import {
   Star,
   Plus,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Link as LinkIcon
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AICoach } from "@/components/AICoach";
 import { QuickActions } from "@/components/QuickActions";
 import CourseCompletionChart from "@/components/CourseCompletionChart";
@@ -35,13 +37,28 @@ import RecentActivityChart from "@/components/RecentActivityChart";
 import SubjectProgress from "@/components/SubjectProgress";
 import Leaderboard from "@/components/Leaderboard";
 
+interface Import {
+  platform: string;
+  problems_count: number;
+  contest_rating: number;
+  badges: any[];
+}
+
+const platformsInfo: Record<string, { name: string, icon: string }> = {
+  leetcode: { name: 'LeetCode', icon: '💻' },
+  hackerrank: { name: 'HackerRank', icon: '🧑‍💻' },
+  codeforces: { name: 'Codeforces', icon: '🚀' },
+  codechef: { name: 'CodeChef', icon: '🌶️' },
+  atcoder: { name: 'AtCoder', icon: '🇯🇵' },
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
   const { generateRoadmap, loading: roadmapLoading } = useAIRoadmap();
   const { toast } = useToast();
   const [studyPlans, setStudyPlans] = useState<any[]>([]);
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
-  const [leetcodeProblems, setLeetcodeProblems] = useState(0);
+  const [imports, setImports] = useState<Import[]>([]);
   const [showRoadmapDialog, setShowRoadmapDialog] = useState(false);
   const [roadmapForm, setRoadmapForm] = useState({
     goal: '',
@@ -51,12 +68,23 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    if (user) {
+    if(user) {
       fetchStudyPlans();
       fetchRecentSessions();
-      fetchLeetCodeStats();
+      fetchImports();
     }
   }, [user]);
+
+  const fetchImports = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('imports')
+      .select('*')
+      .eq('user_id', user.id);
+    if (data) {
+      setImports(data);
+    }
+  };
 
   const fetchStudyPlans = async () => {
     try {
@@ -71,29 +99,6 @@ const Dashboard = () => {
       setStudyPlans(data || []);
     } catch (error) {
       console.error('Error fetching study plans:', error);
-    }
-  };
-
-  const fetchLeetCodeStats = async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('imports')
-        .select('problems_count')
-        .eq('user_id', user.id)
-        .eq('platform', 'leetcode')
-        .single();
-
-      if (error) {
-        // It's okay if this fails, means no record yet.
-        console.log('No LeetCode stats found for user.');
-        return;
-      };
-      if (data) {
-        setLeetcodeProblems(data.problems_count);
-      }
-    } catch (error) {
-      console.error('Error fetching LeetCode stats:', error);
     }
   };
 
@@ -289,6 +294,56 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
+          {/* Platform Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LinkIcon className="h-5 w-5 text-primary" />
+                Coding Platforms
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {imports.length > 0 ? (
+                <Tabs defaultValue={imports[0].platform} className="w-full">
+                  <TabsList>
+                    {imports.map(p => (
+                      <TabsTrigger key={p.platform} value={p.platform}>
+                        {platformsInfo[p.platform]?.icon} {platformsInfo[p.platform]?.name}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  {imports.map(p => (
+                    <TabsContent key={p.platform} value={p.platform}>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+                        <div className="text-center p-4 rounded-lg bg-muted">
+                          <div className="text-2xl font-bold text-primary">{p.problems_count}</div>
+                          <div className="text-sm text-muted-foreground">Problems Solved</div>
+                        </div>
+                        <div className="text-center p-4 rounded-lg bg-muted">
+                          <div className="text-2xl font-bold text-success">{p.contest_rating}</div>
+                          <div className="text-sm text-muted-foreground">Contest Rating</div>
+                        </div>
+                        <div className="col-span-2 text-center p-4 rounded-lg bg-muted">
+                           <div className="text-sm text-muted-foreground mb-2">Badges</div>
+                           <div className="flex flex-wrap gap-2 justify-center">
+                             {p.badges?.slice(0, 5).map((b: any) => <Badge key={b.name} variant="secondary">{b.name}</Badge>)}
+                           </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No platforms synced yet.</p>
+                  <Button variant="outline" size="sm" className="mt-2" asChild>
+                    <a href="/settings">Connect a platform</a>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Today's Tasks */}
           <Card>
             <CardHeader>
@@ -342,8 +397,8 @@ const Dashboard = () => {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{leetcodeProblems}</div>
-                  <div className="text-sm text-muted-foreground">LeetCode Solved</div>
+                  <div className="text-2xl font-bold text-primary">87</div>
+                  <div className="text-sm text-muted-foreground">Problems Solved</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-success">12</div>
