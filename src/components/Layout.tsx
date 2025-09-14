@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Home, Calendar, BookOpen, TrendingUp, Settings, Zap, LogOut, User as UserIcon } from 'lucide-react';
+import { Brain, Home, Calendar, BookOpen, TrendingUp, Settings, Zap, LogOut, User as UserIcon, Link2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,11 +16,10 @@ const Layout = () => {
 
   const navigation = [
     { name: 'Overview', href: '/dashboard', icon: Home },
-    { name: 'Decks', href: '/dashboard/decks', icon: BookOpen },
     { name: 'Study Plans', href: '/dashboard/plans', icon: BookOpen },
-    { name: 'Spaced Repetition', href: '/dashboard/srs', icon: Brain },
     { name: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
     { name: 'Progress', href: '/dashboard/progress', icon: TrendingUp },
+    { name: 'Integrations', href: '/dashboard/integrations', icon: Link2 },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
