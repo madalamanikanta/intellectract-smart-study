@@ -25,6 +25,14 @@ interface Profile {
   };
 }
 
+const platforms = [
+  { id: 'leetcode', name: 'LeetCode', icon: '💻' },
+  { id: 'hackerrank', name: 'HackerRank', icon: '🧑‍💻' },
+  { id: 'codeforces', name: 'Codeforces', icon: '🚀' },
+  { id: 'codechef', name: 'CodeChef', icon: '🌶️' },
+  { id: 'atcoder', name: 'AtCoder', icon: '🇯🇵' },
+];
+
 const Settings = () => {
   const [profile, setProfile] = useState<Profile>({
     display_name: '',
@@ -38,8 +46,8 @@ const Settings = () => {
     }
   });
   const [loading, setLoading] = useState(false);
-  const [syncLoading, setSyncLoading] = useState(false);
-  const [leetcodeUsername, setLeetcodeUsername] = useState('');
+  const [usernames, setUsernames] = useState<Record<string, string>>({});
+  const [syncLoading, setSyncLoading] = useState<Record<string, boolean>>({});
   const [notifications, setNotifications] = useState({
     study_reminders: true,
     progress_updates: true,
@@ -61,13 +69,15 @@ const Settings = () => {
     if (!user) return;
     const { data, error } = await supabase
       .from('imports')
-      .select('username')
-      .eq('user_id', user.id)
-      .eq('platform', 'leetcode')
-      .single();
+      .select('platform, username')
+      .eq('user_id', user.id);
 
     if (data) {
-      setLeetcodeUsername(data.username);
+      const userNamesData = data.reduce((acc, item) => {
+        acc[item.platform] = item.username;
+        return acc;
+      }, {} as Record<string, string>);
+      setUsernames(userNamesData);
     }
   };
 
@@ -121,24 +131,29 @@ const Settings = () => {
     setLoading(false);
   };
 
-  const handleLeetCodeSync = async () => {
-    if (!leetcodeUsername.trim()) {
-      toast({ title: "Username required", description: "Please enter your LeetCode username.", variant: "destructive" });
+  const handleUsernameChange = (platform: string, value: string) => {
+    setUsernames(prev => ({ ...prev, [platform]: value }));
+  };
+
+  const handleSync = async (platform: string) => {
+    const username = usernames[platform];
+    if (!username || !username.trim()) {
+      toast({ title: "Username required", description: `Please enter your ${platform} username.`, variant: "destructive" });
       return;
     }
-    setSyncLoading(true);
+    setSyncLoading(prev => ({ ...prev, [platform]: true }));
     try {
       const { data, error } = await supabase.functions.invoke('import-scores', {
-        body: { platform: 'leetcode', username: leetcodeUsername },
+        body: { platform, username },
       });
 
       if (error) throw error;
 
-      toast({ title: "Success!", description: `Successfully synced ${data.record.problems_count} solved problems from LeetCode.` });
+      toast({ title: "Success!", description: `Successfully synced ${data.record.problems_count} solved problems from ${platform}.` });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: `Failed to sync with ${platform}: ${error.message}`, variant: "destructive" });
     } finally {
-      setSyncLoading(false);
+      setSyncLoading(prev => ({ ...prev, [platform]: false }));
     }
   };
 
@@ -384,25 +399,28 @@ const Settings = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="leetcode_username">LeetCode Username</Label>
-                <Input
-                  id="leetcode_username"
-                  value={leetcodeUsername}
-                  onChange={(e) => setLeetcodeUsername(e.target.value)}
-                  placeholder="e.g., your_username"
-                />
-              </div>
-              <Button
-                className="w-full"
-                onClick={handleLeetCodeSync}
-                disabled={syncLoading}
-              >
-                {syncLoading ? 'Syncing...' : 'Sync LeetCode'}
-              </Button>
+              {platforms.map(p => (
+                <div key={p.id} className="space-y-2">
+                   <Label htmlFor={`${p.id}_username`}>{p.icon} {p.name}</Label>
+                   <div className="flex gap-2">
+                     <Input
+                       id={`${p.id}_username`}
+                       value={usernames[p.id] || ''}
+                       onChange={(e) => handleUsernameChange(p.id, e.target.value)}
+                       placeholder={`Your ${p.name} username`}
+                     />
+                     <Button
+                       onClick={() => handleSync(p.id)}
+                       disabled={syncLoading[p.id]}
+                       variant="outline"
+                     >
+                       {syncLoading[p.id] ? '...' : 'Sync'}
+                     </Button>
+                   </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
-
           <Card className="shadow-medium">
             <CardHeader>
               <CardTitle className="flex items-center">

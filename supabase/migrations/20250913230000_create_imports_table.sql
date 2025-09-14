@@ -6,6 +6,8 @@ CREATE TABLE public.imports (
   username TEXT NOT NULL,
   import_data JSONB,
   problems_count INTEGER NOT NULL DEFAULT 0,
+  contest_rating INTEGER NOT NULL DEFAULT 0,
+  badges JSONB DEFAULT '[]'::jsonb,
   last_synced TIMESTAMPTZ NOT NULL DEFAULT now(),
   status TEXT NOT NULL DEFAULT 'active',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
