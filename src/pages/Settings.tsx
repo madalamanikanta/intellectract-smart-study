@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Settings as SettingsIcon, User, Bell, Shield, Palette, LogOut } from 'lucide-react';
+import { Settings as SettingsIcon, User, Bell, Shield, Palette, LogOut, Link } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +38,8 @@ const Settings = () => {
     }
   });
   const [loading, setLoading] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [leetcodeUsername, setLeetcodeUsername] = useState('');
   const [notifications, setNotifications] = useState({
     study_reminders: true,
     progress_updates: true,
@@ -51,8 +53,23 @@ const Settings = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchIntegrations();
     }
   }, [user]);
+
+  const fetchIntegrations = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('imports')
+      .select('username')
+      .eq('user_id', user.id)
+      .eq('platform', 'leetcode')
+      .single();
+
+    if (data) {
+      setLeetcodeUsername(data.username);
+    }
+  };
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -102,6 +119,27 @@ const Settings = () => {
       });
     }
     setLoading(false);
+  };
+
+  const handleLeetCodeSync = async () => {
+    if (!leetcodeUsername.trim()) {
+      toast({ title: "Username required", description: "Please enter your LeetCode username.", variant: "destructive" });
+      return;
+    }
+    setSyncLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('import-scores', {
+        body: { platform: 'leetcode', username: leetcodeUsername },
+      });
+
+      if (error) throw error;
+
+      toast({ title: "Success!", description: `Successfully synced ${data.record.problems_count} solved problems from LeetCode.` });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setSyncLoading(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -335,6 +373,36 @@ const Settings = () => {
 
         {/* Account Actions */}
         <div className="space-y-6">
+          <Card className="shadow-medium">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Link className="w-5 h-5 mr-2 text-blue-500" />
+                Integrations
+              </CardTitle>
+              <CardDescription>
+                Connect your accounts from other platforms.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="leetcode_username">LeetCode Username</Label>
+                <Input
+                  id="leetcode_username"
+                  value={leetcodeUsername}
+                  onChange={(e) => setLeetcodeUsername(e.target.value)}
+                  placeholder="e.g., your_username"
+                />
+              </div>
+              <Button
+                className="w-full"
+                onClick={handleLeetCodeSync}
+                disabled={syncLoading}
+              >
+                {syncLoading ? 'Syncing...' : 'Sync LeetCode'}
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card className="shadow-medium">
             <CardHeader>
               <CardTitle className="flex items-center">

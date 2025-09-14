@@ -26,8 +26,7 @@ import {
   Star,
   Plus,
   Sparkles,
-  ChevronRight,
-  Repeat
+  ChevronRight
 } from "lucide-react";
 import { AICoach } from "@/components/AICoach";
 import { QuickActions } from "@/components/QuickActions";
@@ -42,7 +41,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [studyPlans, setStudyPlans] = useState<any[]>([]);
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
-  const [dueSrsItems, setDueSrsItems] = useState(0);
+  const [leetcodeProblems, setLeetcodeProblems] = useState(0);
   const [showRoadmapDialog, setShowRoadmapDialog] = useState(false);
   const [roadmapForm, setRoadmapForm] = useState({
     goal: '',
@@ -55,7 +54,7 @@ const Dashboard = () => {
     if (user) {
       fetchStudyPlans();
       fetchRecentSessions();
-      fetchDueSrsItems();
+      fetchLeetCodeStats();
     }
   }, [user]);
 
@@ -75,18 +74,26 @@ const Dashboard = () => {
     }
   };
 
-  const fetchDueSrsItems = async () => {
+  const fetchLeetCodeStats = async () => {
+    if (!user) return;
     try {
-      const { count, error } = await supabase
-        .from('spaced_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
-        .lte('next_review', new Date().toISOString());
+      const { data, error } = await supabase
+        .from('imports')
+        .select('problems_count')
+        .eq('user_id', user.id)
+        .eq('platform', 'leetcode')
+        .single();
 
-      if (error) throw error;
-      setDueSrsItems(count || 0);
+      if (error) {
+        // It's okay if this fails, means no record yet.
+        console.log('No LeetCode stats found for user.');
+        return;
+      };
+      if (data) {
+        setLeetcodeProblems(data.problems_count);
+      }
     } catch (error) {
-      console.error('Error fetching due SRS items:', error);
+      console.error('Error fetching LeetCode stats:', error);
     }
   };
 
@@ -282,29 +289,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Spaced Repetition Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Repeat className="h-5 w-5 text-primary" />
-                Spaced Repetition
-              </CardTitle>
-              <CardDescription>
-                Review concepts to improve long-term retention.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-3xl font-bold">{dueSrsItems}</p>
-              <p className="text-muted-foreground mb-4">items due for review</p>
-              <Button asChild disabled={dueSrsItems === 0}>
-                <a href="/dashboard/srs-review">
-                  <Zap className="h-4 w-4 mr-2" />
-                  Start Review Session
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-
           {/* Today's Tasks */}
           <Card>
             <CardHeader>
@@ -358,8 +342,8 @@ const Dashboard = () => {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">87</div>
-                  <div className="text-sm text-muted-foreground">Problems Solved</div>
+                  <div className="text-2xl font-bold text-primary">{leetcodeProblems}</div>
+                  <div className="text-sm text-muted-foreground">LeetCode Solved</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-success">12</div>
