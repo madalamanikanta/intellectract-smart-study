@@ -8,10 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Target, Clock, BookOpen, Trash2, Edit, Play } from 'lucide-react';
+import { Plus, Target, Clock, BookOpen, Trash2, Edit, Play, Repeat, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+
+interface PlanItem {
+  id: string;
+  title: string;
+  topic: string;
+  status: string;
+}
 
 interface StudyPlan {
   id: string;
@@ -23,6 +31,7 @@ interface StudyPlan {
   timeline_days: number;
   status: string;
   created_at: string;
+  plan_items: PlanItem[];
 }
 
 const StudyPlans = () => {
@@ -43,9 +52,9 @@ const StudyPlans = () => {
   const fetchStudyPlans = async () => {
     if (!user) return;
     
-    const { data, error } = await supabase
+    const { data: plans, error } = await supabase
       .from('study_plans')
-      .select('*')
+      .select('*, plan_items(*)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -56,7 +65,7 @@ const StudyPlans = () => {
         variant: "destructive",
       });
     } else {
-      setStudyPlans(data || []);
+      setStudyPlans(plans || []);
     }
     setLoading(false);
   };
@@ -99,6 +108,37 @@ const StudyPlans = () => {
         timeline_days: 30
       });
       fetchStudyPlans();
+    }
+  };
+
+  const addPlanItemToSrs = async (item: PlanItem) => {
+    if (!user) return;
+
+    // Check if item already exists in SRS
+    const { data: existing, error: checkError } = await supabase
+      .from('spaced_items')
+      .select('id')
+      .eq('concept_id', item.id)
+      .single();
+
+    if (existing) {
+      toast({ title: "Already added", description: "This item is already in your SRS queue." });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('spaced_items')
+      .insert({
+        user_id: user.id,
+        concept_id: item.id,
+        concept_title: item.title,
+        // other fields will have default values
+      });
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to add item to SRS.", variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Item added to your SRS queue for review." });
     }
   };
 
@@ -315,6 +355,25 @@ const StudyPlans = () => {
                       <span className="text-muted-foreground">{plan.timeline_days} days</span>
                     </div>
                   </div>
+
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground">
+                        <ChevronDown className="w-4 h-4 mr-2" />
+                        {plan.plan_items.length} Plan Items
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 pt-2">
+                      {plan.plan_items.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-2 border rounded-md">
+                          <span className="text-sm">{item.title}</span>
+                          <Button size="icon" variant="ghost" onClick={() => addPlanItemToSrs(item)}>
+                            <Repeat className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
                   
                   <div className="flex space-x-2 pt-2">
                     <Button size="sm" className="flex-1 bg-gradient-primary text-primary-foreground hover:opacity-90">

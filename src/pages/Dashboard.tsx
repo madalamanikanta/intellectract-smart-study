@@ -26,7 +26,8 @@ import {
   Star,
   Plus,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Repeat
 } from "lucide-react";
 import { AICoach } from "@/components/AICoach";
 import { QuickActions } from "@/components/QuickActions";
@@ -41,6 +42,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [studyPlans, setStudyPlans] = useState<any[]>([]);
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
+  const [dueSrsItems, setDueSrsItems] = useState(0);
   const [showRoadmapDialog, setShowRoadmapDialog] = useState(false);
   const [roadmapForm, setRoadmapForm] = useState({
     goal: '',
@@ -50,9 +52,12 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    fetchStudyPlans();
-    fetchRecentSessions();
-  }, []);
+    if (user) {
+      fetchStudyPlans();
+      fetchRecentSessions();
+      fetchDueSrsItems();
+    }
+  }, [user]);
 
   const fetchStudyPlans = async () => {
     try {
@@ -67,6 +72,21 @@ const Dashboard = () => {
       setStudyPlans(data || []);
     } catch (error) {
       console.error('Error fetching study plans:', error);
+    }
+  };
+
+  const fetchDueSrsItems = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('spaced_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .lte('next_review', new Date().toISOString());
+
+      if (error) throw error;
+      setDueSrsItems(count || 0);
+    } catch (error) {
+      console.error('Error fetching due SRS items:', error);
     }
   };
 
@@ -259,6 +279,29 @@ const Dashboard = () => {
                   </Button>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Spaced Repetition Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Repeat className="h-5 w-5 text-primary" />
+                Spaced Repetition
+              </CardTitle>
+              <CardDescription>
+                Review concepts to improve long-term retention.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-3xl font-bold">{dueSrsItems}</p>
+              <p className="text-muted-foreground mb-4">items due for review</p>
+              <Button asChild disabled={dueSrsItems === 0}>
+                <a href="/dashboard/srs-review">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Start Review Session
+                </a>
+              </Button>
             </CardContent>
           </Card>
 
