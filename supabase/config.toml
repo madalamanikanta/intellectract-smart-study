@@ -16,3 +16,6 @@ enable_manual_linking = false
 
 [functions.ai-roadmap]
 verify_jwt = true
+
+[functions.import-scores]
+verify_jwt = true
